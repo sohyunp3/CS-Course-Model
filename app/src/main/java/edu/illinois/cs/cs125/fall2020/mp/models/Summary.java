@@ -136,9 +136,21 @@ public class Summary implements SortedListAdapter.ViewModel {
     return equals(model);
   }
 
-  public static final Comparator<Summary> COMPARATOR =
-      (courseModel1, courseModel2) -> 0;
+  /**
+   * COMPARATOR course model.
+   * @param courseModel1
+   * @param courseModel2
+   * @return Comparator<Summary>
+   */
+  public static final Comparator<Summary> COMPARATOR = (courseModel1, courseModel2) ->
+          Integer.compare(courseModel1.number.compareTo(courseModel2.number), 0);
 
+   /**
+    * Filter.
+    * @param courses
+    * @param text
+    * @return List<Summary>
+    */
   public static List<Summary> filter(
       @NonNull final List<Summary> courses, @NonNull final String text) {
     return courses;

@@ -1,6 +1,7 @@
 package edu.illinois.cs.cs125.fall2020.mp.activities;
 
 import android.os.Bundle;
+//import android.util.Log;
 import android.widget.SearchView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
@@ -48,7 +49,6 @@ public final class MainActivity extends AppCompatActivity
   @Override
   protected void onCreate(final Bundle unused) {
     super.onCreate(unused);
-
     // Retrieve the API client from the application and initiate a course summary request
     CourseableApplication application = (CourseableApplication) getApplication();
     application.getCourseClient().getSummary(DEFAULT_YEAR, DEFAULT_SEMESTER, this);
@@ -125,6 +125,7 @@ public final class MainActivity extends AppCompatActivity
    */
   @Override
   public boolean onQueryTextChange(final String query) {
+    //Log.d(TAG, "New search is " + query);
     return true;
   }
 
