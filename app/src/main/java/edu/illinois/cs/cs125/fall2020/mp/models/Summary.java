@@ -70,6 +70,13 @@ public class Summary implements SortedListAdapter.ViewModel {
   }
 
   /**
+   * Get everything.
+   * @return everything I got including department, number, and title.
+   */
+  public final String getEverything() {
+    return department + " " + number + ": " + title;
+  }
+  /**
    * Create an empty Summary.
    */
   @SuppressWarnings({"unused", "RedundantSuppression"})
@@ -142,8 +149,9 @@ public class Summary implements SortedListAdapter.ViewModel {
    * @param courseModel2
    * @return Comparator<Summary>
    */
-  public static final Comparator<Summary> COMPARATOR = (courseModel1, courseModel2) ->
-          Integer.compare(courseModel1.number.compareTo(courseModel2.number), 0);
+  public static final Comparator<Summary> COMPARATOR = (courseModel1, courseModel2) -> {
+    return courseModel1.getEverything().compareTo(courseModel2.getEverything());
+  };
 
    /**
     * Filter.
