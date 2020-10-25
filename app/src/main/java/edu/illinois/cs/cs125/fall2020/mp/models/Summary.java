@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.github.wrdlbrnft.sortedlistadapter.SortedListAdapter;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -161,6 +162,12 @@ public class Summary implements SortedListAdapter.ViewModel {
     */
   public static List<Summary> filter(
       @NonNull final List<Summary> courses, @NonNull final String text) {
-    return courses;
+    List<Summary> result = new ArrayList<>();
+    for (Summary course: courses) {
+      if (course.getEverything().toLowerCase().contains(text.toLowerCase())) {
+        result.add(course);
+      }
+    }
+    return result;
   }
 }
