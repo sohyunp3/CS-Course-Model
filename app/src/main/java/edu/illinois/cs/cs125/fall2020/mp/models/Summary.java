@@ -69,7 +69,6 @@ public class Summary implements SortedListAdapter.ViewModel {
   public final String getTitle() {
     return title;
   }
-
   /**
    * Get everything.
    * @return everything I got including department, number, and title.
@@ -92,6 +91,7 @@ public class Summary implements SortedListAdapter.ViewModel {
    * @param setNumber     the number for this Summary
    * @param setTitle      the title for this Summary
    */
+  @SuppressWarnings("checkstyle:JavadocMethod")
   public Summary(
       final String setYear,
       final String setSemester,
@@ -162,12 +162,10 @@ public class Summary implements SortedListAdapter.ViewModel {
     */
   public static List<Summary> filter(
       @NonNull final List<Summary> courses, @NonNull final String text) {
-    assert text != null;
-    assert courses != null;
     List<Summary> result = new ArrayList<>();
-    for (Summary course: courses) {
-      if (course.getEverything().toLowerCase().contains(text.toLowerCase())) {
-        result.add(course);
+    for (Summary c: courses) {
+      if (c.getEverything().toLowerCase().contains(text.toLowerCase())) {
+        result.add(c);
       }
     }
     return result;
