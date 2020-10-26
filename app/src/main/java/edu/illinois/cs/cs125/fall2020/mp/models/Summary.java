@@ -162,6 +162,8 @@ public class Summary implements SortedListAdapter.ViewModel {
     */
   public static List<Summary> filter(
       @NonNull final List<Summary> courses, @NonNull final String text) {
+    assert text != null;
+    assert courses != null;
     List<Summary> result = new ArrayList<>();
     for (Summary course: courses) {
       if (course.getEverything().toLowerCase().contains(text.toLowerCase())) {
