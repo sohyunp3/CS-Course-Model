@@ -54,13 +54,13 @@ public final class Server extends Dispatcher {
   // course/2020/fall/CS/125
   private MockResponse getCourse(@NonNull final String path) {
     String[] parts = path.split("/");
-    final int leng = 5;
+    final int leng = 4;
     if (parts.length != leng) {
       return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
     }
+    Summary paths = new Summary(parts[0], parts[1], parts[2], parts[3], null);
 
-    String course = summaries.get(parts[0] + "_" + parts[1] + "_" + parts[2] + "_" + parts[3] + "_"
-            + parts[leng - 1]);
+    String course = courses.get(paths);
     if (course == null) {
       return new MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
     }
