@@ -76,6 +76,7 @@ public class Summary implements SortedListAdapter.ViewModel {
   public final String getEverything() {
     return department + " " + number + ": " + title;
   }
+
   /**
    * Create an empty Summary.
    */
