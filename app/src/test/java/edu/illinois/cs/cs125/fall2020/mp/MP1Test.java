@@ -38,7 +38,7 @@ import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-//import edu.illinois.cs.cs125.fall2020.mp.activities.CourseActivity;
+import edu.illinois.cs.cs125.fall2020.mp.activities.CourseActivity;
 import edu.illinois.cs.cs125.fall2020.mp.activities.MainActivity;
 import edu.illinois.cs.cs125.fall2020.mp.application.CourseableApplication;
 import edu.illinois.cs.cs125.fall2020.mp.models.Course;
