@@ -58,7 +58,7 @@ public final class Server extends Dispatcher {
     if (parts.length != leng) {
       return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
     }
-    Summary paths = new Summary(parts[0], parts[1], parts[2], parts[3], null);
+    Summary paths = new Summary(parts[0], parts[1], parts[2], parts[3], "");
 
     String course = courses.get(paths);
     if (course == null) {
