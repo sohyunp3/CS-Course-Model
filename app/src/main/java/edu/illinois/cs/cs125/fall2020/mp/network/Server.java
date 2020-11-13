@@ -60,7 +60,7 @@ public final class Server extends Dispatcher {
     }
     Summary paths = new Summary(parts[0], parts[1], parts[2], parts[3], "");
 
-    String course = courses.get(paths);
+    String course = courses.getOrDefault(paths, null);
     if (course == null) {
       return new MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
     }
