@@ -2,6 +2,8 @@ package edu.illinois.cs.cs125.fall2020.mp.network;
 
 import android.util.Log;
 import androidx.annotation.NonNull;
+
+import com.android.volley.AuthFailureError;
 import com.android.volley.Cache;
 import com.android.volley.ExecutorDelivery;
 import com.android.volley.Network;
@@ -16,6 +18,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.illinois.cs.cs125.fall2020.mp.application.CourseableApplication;
 import edu.illinois.cs.cs125.fall2020.mp.models.Course;
+import edu.illinois.cs.cs125.fall2020.mp.models.Rating;
 import edu.illinois.cs.cs125.fall2020.mp.models.Summary;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -53,7 +56,21 @@ public final class Client {
      * @param course the course that was retrieved
      */
     default void courseResponse(Summary summary, Course course) {}
+
+    /**
+     * Return a single rating for the given summary and rating.
+     * @param summary the summary that was retrieved
+     * @param rating the rating that was retrieved
+     */
+    default void yourRating(Summary summary, Rating rating) {}
+
+    /**
+     * testPost method.
+     * @param theString
+     */
+    default void testPost(String theString) { }
   }
+
 
   /**
    * Retrieve course summaries for a given year and semester.
@@ -109,7 +126,95 @@ public final class Client {
     requestQueue.add(summaryRequest);
   }
 
+  /**
+   * Retrieve rating from user.
+   *
+   * @param summary summary
+   * @param clientId the summary to retrieve
+   * @param callbacks the callback that will receive the result
+   */
+  public void getRating(
+          @NonNull final Summary summary,
+          @NonNull final String clientId,
+          @NonNull final CourseClientCallbacks callbacks) {
+    String url = CourseableApplication.SERVER_URL + "rating/" + summary.getYear() + "/"
+            + summary.getSemester() + "/" + summary.getDepartment() + "/" + summary.getNumber()
+            + "?client=" + clientId;
+    StringRequest ratingRequest =
+            new StringRequest(
+                    Request.Method.GET,
+                    url,
+                    response -> {
+                      try {
+                        Rating ratingValue = objectMapper.readValue(response, Rating.class);
+                        callbacks.yourRating(summary, ratingValue);
+                      } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                      }
+                    },
+                    error -> Log.e(TAG, error.toString()));
+    requestQueue.add(ratingRequest);
+  }
 
+  /**
+   * Sets the string.
+   * @param theString the String from client
+   * @param callbacks the callback to send the data to server
+   */
+  public void setString(
+          @NonNull final String theString,
+          @NonNull final CourseClientCallbacks callbacks) {
+    String url = CourseableApplication.SERVER_URL + "test/";
+    StringRequest summaryRequest =
+            new StringRequest(
+                    Request.Method.POST,
+                    url,
+                    response -> callbacks.testPost(response.toString()),
+                    error -> Log.e(TAG, error.toString())) {
+      @Override
+      public byte[] getBody() throws AuthFailureError {
+        return theString.getBytes();
+      }
+    };
+    requestQueue.add(summaryRequest);
+  }
+
+  /**
+   * gets the String.
+   * @param callbacks
+   */
+  public void getString(
+          @NonNull final CourseClientCallbacks callbacks) {
+    String url = CourseableApplication.SERVER_URL + "test/";
+    StringRequest summaryRequest =
+            new StringRequest(
+                    Request.Method.GET,
+                    url,
+                    response -> callbacks.testPost(response.toString()),
+                    error -> Log.e(TAG, error.toString()));
+    requestQueue.add(summaryRequest);
+  }
+
+  /**
+   * Post rating from use input.
+   * @param summary the summary that was retrieved
+   * @param rating thd rating that was retrieved
+   * @param callbacks the callbacks that was retrieved
+   */
+  public void postRating(
+      @NonNull final Summary summary, @NonNull final Rating rating, @NonNull final CourseClientCallbacks callbacks
+  ) {
+    String url = CourseableApplication.SERVER_URL + "rating/" + summary.getYear() + "/"
+            + summary.getSemester() + "/" + summary.getDepartment() + "/" + summary.getNumber()
+            + "?client=" + rating.getId();
+    StringRequest ratingRequest =
+            new StringRequest(
+                    Request.Method.POST,
+                    url,
+                    response -> callbacks.yourRating(summary, rating),
+                    error -> Log.e(TAG, error.toString()));
+    requestQueue.add(ratingRequest);
+  }
   private static Client instance;
 
   /**

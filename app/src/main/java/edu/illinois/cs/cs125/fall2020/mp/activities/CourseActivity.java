@@ -1,11 +1,14 @@
 package edu.illinois.cs.cs125.fall2020.mp.activities;
 
+//import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.RatingBar;
 //import android.util.Log;
 
 //import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
+//import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
@@ -31,6 +34,7 @@ public class CourseActivity extends AppCompatActivity implements Client.CourseCl
   @NonNull private String name;
   @NonNull private String description;
   private ObjectMapper mapper = new ObjectMapper();
+  private RatingBar ratingBar;
 
   /**
    * not implemented yet.
@@ -53,9 +57,23 @@ public class CourseActivity extends AppCompatActivity implements Client.CourseCl
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
-    //Log.d(TAG, intent.getStringExtra("TITLE"));
-    //binding.name.setText(intent.getStringExtra("COURSE"));
-
+    //RatingBar bar = (RatingBar) findViewById(R.id.rating);
+    ratingBar = findViewById(R.id.rating);
+//    ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+//      @Override
+//      public void onRatingChanged(final RatingBar ratingBar, final float rating, final boolean fromUser) {
+//        AlertDialog alertDialog = new AlertDialog.Builder(CourseActivity.this).create();
+//        alertDialog.setTitle("Alert");
+//        alertDialog.setMessage(Float.toString(rating));
+//        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+//                new DialogInterface.OnClickListener() {
+//            public void onClick(final DialogInterface dialog, final int which) {
+//              dialog.dismiss();
+//            }
+//            });
+//        alertDialog.show();
+//      }
+//    });
   }
   /**
    * courseResponse.
@@ -68,5 +86,6 @@ public class CourseActivity extends AppCompatActivity implements Client.CourseCl
     description = course.getDescription();
     binding.name.setText(name);
     binding.description.setText(description);
+    binding.rating.setRating(course.getRating());
   }
 }

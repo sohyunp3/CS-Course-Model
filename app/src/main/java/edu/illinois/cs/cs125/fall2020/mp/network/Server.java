@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.illinois.cs.cs125.fall2020.mp.application.CourseableApplication;
+import edu.illinois.cs.cs125.fall2020.mp.models.Rating;
 import edu.illinois.cs.cs125.fall2020.mp.models.Summary;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -13,10 +14,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Scanner;
+
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+//import okhttp3.mockwebserver.internal.duplex.DuplexResponseBody;
 
 /**
  * Development course API server.
@@ -67,6 +70,58 @@ public final class Server extends Dispatcher {
     return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(course);
   }
 
+  private final Map<Summary, Map<String, Rating>> ratings = new HashMap<>();
+  private boolean checkUUID(@NonNull final String uuid) {
+    if (uuid.matches("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")) {
+      return true;
+    }
+    return false;
+  }
+  //rating/YEAR/SEMESTER/DEPARTMENT/NUMBER?client=UUID
+  private MockResponse getRating(@NonNull final String path) {
+    String[] parts = path.split("/");
+    final int len = 4;
+    if (parts.length != len) {
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+    }
+    String[] values = parts[3].split("\\?" + "client=");
+    if (values.length != 2) {
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+    }
+    Rating rating = new Rating(values[1], Rating.NOT_RATED);
+    Summary summary = new Summary(parts[0], parts[1], parts[2], parts[0], "");
+    String courseValue = courses.get(summary);
+    if (courseValue == null) {
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
+    }
+    Map<String, Rating> map = new HashMap<>();
+    map = ratings.getOrDefault(summary, null);
+    if (map != null && map.containsKey(values[1])) {
+      rating = map.get(values[1]);
+    }
+    try {
+      ObjectMapper objMapper = new ObjectMapper();
+      String arg = objMapper.writeValueAsString(rating);
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(arg);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+    return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+  }
+
+  private String theString;
+  private MockResponse testPost(@NonNull final RecordedRequest request) {
+    if (request.getMethod().equals("GET")) {
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(theString);
+    } else if (request.getMethod().equals("POST")) {
+      theString = request.getBody().readUtf8();
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP).setHeader(
+              "Location", "/test/"
+      );
+    }
+    return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+  }
+
   @NonNull
   @Override
   public MockResponse dispatch(@NonNull final RecordedRequest request) {
@@ -80,6 +135,8 @@ public final class Server extends Dispatcher {
         return getSummary(path.replaceFirst("/summary/", ""));
       } else if (path.startsWith("/course/")) {
         return getCourse(path.replaceFirst("/course/", ""));
+      } else if (path.equals("/test/")) {
+        return testPost(request);
       }
       return new MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
     } catch (Exception e) {

@@ -10,6 +10,7 @@ public class Course extends Summary {
   public Course() {}
 
   private String description;
+  private float rating;
   /**
    * Provide description when clicked.
    * @return description.
@@ -19,7 +20,12 @@ public class Course extends Summary {
   }
 
   /**
-   * Provide year when clicked.
-   * @return year from Summary class
+   * Provide rating.
+   * @return rating.
    */
+  public float getRating() {
+    return rating;
+  }
+
+
 }
