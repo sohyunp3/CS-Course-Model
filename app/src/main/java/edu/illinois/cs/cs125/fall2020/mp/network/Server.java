@@ -71,33 +71,34 @@ public final class Server extends Dispatcher {
   }
 
   private final Map<Summary, Map<String, Rating>> ratings = new HashMap<>();
-  private boolean checkUUID(@NonNull final String uuid) {
+  private boolean validUUID(@NonNull final String uuid) {
     if (uuid.matches("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")) {
       return true;
     }
     return false;
   }
   //rating/YEAR/SEMESTER/DEPARTMENT/NUMBER?client=UUID
-  private MockResponse getRating(@NonNull final String path) {
+  private MockResponse getRating(@NonNull final RecordedRequest request) {
+    String path = request.getPath().replaceFirst("/rating/", "");
     String[] parts = path.split("/");
     final int len = 4;
     if (parts.length != len) {
       return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
     }
-    String[] values = parts[3].split("\\?" + "client=");
-    if (values.length != 2) {
+    String[] uuid = parts[3].split("\\?" + "client=");
+    if (uuid.length != 2) {
       return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
     }
-    Rating rating = new Rating(values[1], Rating.NOT_RATED);
-    Summary summary = new Summary(parts[0], parts[1], parts[2], parts[0], "");
+    Rating rating = new Rating(uuid[1], Rating.NOT_RATED);
+    Summary summary = new Summary(parts[0], parts[1], parts[2], uuid[0], "");
     String courseValue = courses.get(summary);
     if (courseValue == null) {
       return new MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
     }
     Map<String, Rating> map = new HashMap<>();
     map = ratings.getOrDefault(summary, null);
-    if (map != null && map.containsKey(values[1])) {
-      rating = map.get(values[1]);
+    if (map != null && map.containsKey(uuid[1])) {
+      rating = map.get(uuid[1]);
     }
     try {
       ObjectMapper objMapper = new ObjectMapper();
@@ -137,6 +138,8 @@ public final class Server extends Dispatcher {
         return getCourse(path.replaceFirst("/course/", ""));
       } else if (path.equals("/test/")) {
         return testPost(request);
+      } else if (path.startsWith("/rating/")) {
+        return getRating(request);
       }
       return new MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
     } catch (Exception e) {
