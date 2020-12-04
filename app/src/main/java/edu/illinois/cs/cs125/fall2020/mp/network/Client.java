@@ -207,16 +207,22 @@ public final class Client {
     String url = CourseableApplication.SERVER_URL + "rating/" + summary.getYear() + "/"
             + summary.getSemester() + "/" + summary.getDepartment() + "/" + summary.getNumber()
             + "?client=" + rating.getId();
+    String star = String.valueOf(rating.getRating());
+    String body = url + "&" + star;
     StringRequest ratingRequest =
             new StringRequest(
                     Request.Method.POST,
                     url,
                     response -> callbacks.yourRating(summary, rating),
-                    error -> Log.e(TAG, error.toString()));
+                    error -> Log.e(TAG, error.toString())) {
+      @Override
+      public byte[] getBody() throws AuthFailureError {
+        return body.getBytes();
+      }
+    };
     requestQueue.add(ratingRequest);
   }
   private static Client instance;
-
   /**
    * Retrieve the course API client. Creates one if it does not already exist.
    *
