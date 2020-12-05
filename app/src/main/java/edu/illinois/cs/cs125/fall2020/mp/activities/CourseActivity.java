@@ -67,16 +67,6 @@ public class CourseActivity extends AppCompatActivity implements Client.CourseCl
     ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
       @Override
       public void onRatingChanged(final RatingBar bar, final float rating, final boolean fromUser) {
-//        AlertDialog alertDialog = new AlertDialog.Builder(CourseActivity.this).create();
-//        alertDialog.setTitle("Alert");
-//        alertDialog.setMessage(Float.toString(rating));
-//        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-//                new DialogInterface.OnClickListener() {
-//            public void onClick(final DialogInterface dialog, final int which) {
-//              dialog.dismiss();
-//            }
-//            });
-//        alertDialog.show();
         Rating r = new Rating(application.getClientID(), (double) rating);
         application.getCourseClient().postRating(course, r, self);
       }
