@@ -125,7 +125,7 @@ public final class Server extends Dispatcher {
         e.printStackTrace();
         return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
       }
-      System.out.println(newRating.getId() + newRating.getRating());
+      //System.out.println(newRating.getId() + newRating.getRating());
       ratings.put(path, newRating);
       return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(rating);
     }
