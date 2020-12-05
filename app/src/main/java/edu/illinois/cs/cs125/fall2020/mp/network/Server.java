@@ -70,125 +70,132 @@ public final class Server extends Dispatcher {
     return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(course);
   }
 
-  private final Map<Summary, Map<String, Rating>> ratings = new HashMap<>();
+
   private boolean validUUID(@NonNull final String uuid) {
     if (uuid.matches("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")) {
       return true;
     }
     return false;
   }
-  private final Map<String, Rating> ratingMap = new HashMap<>();
+  private final Map<String, Rating> ratings = new HashMap<>();
   //rating/YEAR/SEMESTER/DEPARTMENT/NUMBER?client=UUID
   private MockResponse getRating(@NonNull final RecordedRequest request) {
-    String path = request.getPath().replaceFirst("/rating/", "");
-    // split by client
-    String[] parts = path.split("\\?client=");
-    if (parts.length != 2) {
-      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
-    }
-    // split by slash, containing YEAR/SEMESTER/DEPARTMENT/NUMBER
-    String[] bySlash = parts[0].split("/");
-    final int len = 4;
-    if (bySlash.length != len) {
-      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
-    }
-    // check if uuid is valid
-    String uuid = parts[1];
-    if (!validUUID(uuid)) {
-      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
-    }
-    Summary coursePath = new Summary(bySlash[0], bySlash[1], bySlash[2], bySlash[3], "");
-    String course = courses.getOrDefault(coursePath, null);
-    if (course == null) {
-      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
-    }
-    // serialize accepted rating in to String
-    String rating = "";
-    if (request.getMethod().equals("GET")) {
-      Rating newRating = ratingMap.getOrDefault(path, new Rating(uuid, Rating.NOT_RATED));
-      // check if ratingValue uuid request uuid
-      if (!uuid.equals(newRating.getId())) {
-        return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
-      }
-      // deserialization
-      try {
-        rating = mapper.writeValueAsString(newRating);
-      } catch (JsonProcessingException e) {
-        e.printStackTrace();
-      }
-      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(rating);
-    } else if (request.getMethod().equals("POST")) {
-      // things to consider
-      // 1. deserialize request => String into Rating
-      // 2. url not properly formatted || body JSON invalid || uuid != uuid => HTTP_BAD_REQUEST
-      // 3. course == null => HTTP_NOT_FOUND
-      // get request info in String
-      rating = request.getBody().readUtf8();
-      Rating postR = new Rating();
-      if (!rating.isEmpty()) {
-        if (rating.charAt(0) != '{' || rating.charAt(rating.length() - 1) != '}') {
-          return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
-        }
-      }
-      try {
-        postR = mapper.readValue(rating, Rating.class);
-      } catch (JsonProcessingException e) {
-        e.printStackTrace();
-        return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK);
-      }
-      if (!uuid.equals(postR.getId())) {
-        return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
-      }
-
-      ratingMap.put(path, postR);
-      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(rating);
-    }
-    return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
-//    String[] parts = path.split("/");
+//    String path = request.getPath().replaceFirst("/rating/", "");
+//    // split by client
+//    String[] parts = path.split("\\?client=");
+//    if (parts.length != 2) {
+//      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+//    }
+//    // split by slash, containing YEAR/SEMESTER/DEPARTMENT/NUMBER
+//    String[] bySlash = parts[0].split("/");
 //    final int len = 4;
-//    if (parts.length != len) {
+//    if (bySlash.length != len) {
 //      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
 //    }
-//    String[] uuid = parts[3].split("\\?" + "client=");
-//    String uuidNum = uuid[1];
-//    if (uuid.length != 2) {
+//    // check if uuid is valid
+//    String uuid = parts[1];
+//    if (!validUUID(uuid)) {
 //      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
 //    }
-//    Rating rating = new Rating(uuid[1], Rating.NOT_RATED);
-//    Summary summary = new Summary(parts[0], parts[1], parts[2], uuid[0], "");
-//    String courseValue = courses.get(summary);
-//    if (!validUUID(uuidNum)) {
-//      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
-//    }
-//    if (courseValue == null) {
+//    Summary coursePath = new Summary(bySlash[0], bySlash[1], bySlash[2], bySlash[3], "");
+//    String course = courses.getOrDefault(coursePath, null);
+//    if (course == null) {
 //      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
 //    }
-//    Map<String, Rating> map = new HashMap<>();
-//    map = ratings.getOrDefault(summary, null);
-//    if (map != null && map.containsKey(uuid[1])) {
-//      rating = map.get(uuid[1]);
-//    }
-//    try {
-//      ObjectMapper objMapper = new ObjectMapper();
-//      String arg = objMapper.writeValueAsString(rating);
-//      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(arg);
-//    } catch (JsonProcessingException e) {
-//      e.printStackTrace();
-//    }
-//    // Post rating
+//    // serialize accepted rating in to String
+//    String rating = "";
 //    if (request.getMethod().equals("GET")) {
-//      Rating newRating = ratings.getOrDefault(courses, new Rating(uuidNum, Rating.NOT_RATED));
-//      if (!uuid[1].equals(newRating.getId())) {
+//      Rating newRating = ratingMap.getOrDefault(path, new Rating(uuid, Rating.NOT_RATED));
+//      // check if ratingValue uuid request uuid
+//      if (!uuid.equals(newRating.getId())) {
 //        return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
 //      }
+//      // deserialization
 //      try {
 //        rating = mapper.writeValueAsString(newRating);
 //      } catch (JsonProcessingException e) {
 //        e.printStackTrace();
 //      }
 //      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(rating);
+//    } else if (request.getMethod().equals("POST")) {
+//      // things to consider
+//      // 1. deserialize request => String into Rating
+//      // 2. url not properly formatted || body JSON invalid || uuid != uuid => HTTP_BAD_REQUEST
+//      // 3. course == null => HTTP_NOT_FOUND
+//      // get request info in String
+//      rating = request.getBody().readUtf8();
+//      Rating postR = new Rating();
+//      if (!rating.isEmpty()) {
+//        if (rating.charAt(0) != '{' || rating.charAt(rating.length() - 1) != '}') {
+//          return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+//        }
+//      }
+//      try {
+//        postR = mapper.readValue(rating, Rating.class);
+//      } catch (JsonProcessingException e) {
+//        e.printStackTrace();
+//        return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK);
+//      }
+//      if (!uuid.equals(postR.getId())) {
+//        return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+//      }
+//
+//      ratingMap.put(path, postR);
+//      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(rating);
 //    }
 //    return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+
+    // 내 원래 코드임
+    String path = request.getPath().replaceFirst("/rating/", "");
+    String[] parts = path.split("/");
+    final int len = 4;
+    if (parts.length != len) {
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+    }
+    String[] uuid = parts[3].split("\\?" + "client=");
+    if (uuid.length != 2) {
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+    }
+    String uuidNum = uuid[1];
+    Summary summary = new Summary(parts[0], parts[1], parts[2], uuid[0], "");
+    String courseValue = courses.get(summary);
+    if (!validUUID(uuidNum)) {
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+    }
+    if (courseValue == null) {
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
+    }
+
+
+    // Post rating
+    String rating = "";
+    if (request.getMethod().equals("GET")) {
+      Rating newRating = ratings.getOrDefault(path, new Rating(uuidNum, Rating.NOT_RATED));
+      if (!uuid[1].equals(newRating.getId())) {
+        return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+      }
+      try {
+        rating = mapper.writeValueAsString(newRating);
+      } catch (JsonProcessingException e) {
+        e.printStackTrace();
+        return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+      }
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(rating);
+    } else if (request.getMethod().equals("POST")) {
+      rating = request.getBody().readUtf8();
+      System.out.println(rating);
+      Rating newRating;
+      try {
+        newRating = mapper.readValue(rating, Rating.class);
+      } catch (JsonProcessingException e) {
+        e.printStackTrace();
+        return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+      }
+      System.out.println(newRating.getId() + newRating.getRating());
+      ratings.put(path, newRating);
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(rating);
+    }
+    return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
   }
 
   private String theString;

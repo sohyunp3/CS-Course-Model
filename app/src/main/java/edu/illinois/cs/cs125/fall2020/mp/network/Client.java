@@ -207,8 +207,15 @@ public final class Client {
     String url = CourseableApplication.SERVER_URL + "rating/" + summary.getYear() + "/"
             + summary.getSemester() + "/" + summary.getDepartment() + "/" + summary.getNumber()
             + "?client=" + rating.getId();
-    String star = String.valueOf(rating.getRating());
-    String body = url + "&" + star;
+    String newRating = "";
+//    String star = String.valueOf(rating.getRating());
+//    String body = url + "&" + star;
+    try {
+      newRating = objectMapper.writeValueAsString(rating);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+    final String copy = newRating;
     StringRequest ratingRequest =
             new StringRequest(
                     Request.Method.POST,
@@ -217,7 +224,7 @@ public final class Client {
                     error -> Log.e(TAG, error.toString())) {
       @Override
       public byte[] getBody() throws AuthFailureError {
-        return body.getBytes();
+        return copy.getBytes();
       }
     };
     requestQueue.add(ratingRequest);
